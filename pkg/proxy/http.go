@@ -33,7 +33,7 @@ func HTTP(conn net.Conn, buffer []byte, target string) {
 		}
 	}
 
-	conn.Write([]byte(status.ETR))
+	conn.Write([]byte("\r\n"))
 
 	_, err = io.Copy(conn, resp.Body)
 	if err != nil {
