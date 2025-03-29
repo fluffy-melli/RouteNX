@@ -14,6 +14,7 @@ WORKDIR /root/
 
 COPY --from=builder /app/routenx .
 COPY --from=builder /app/RouteNX.json ./
+COPY --from=builder /app/dist ./
 
 EXPOSE 8080
 

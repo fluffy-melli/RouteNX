@@ -15,7 +15,7 @@ This command will create an image named `routenx` using the Dockerfile in the cu
 After building the image, you can run the container with this command:
 
 ```sh
-docker run -d -p 8080:8080 routenx
+docker run -d -p 8080:8080 -p 3000:3000 routenx
 ```
 
 ---
