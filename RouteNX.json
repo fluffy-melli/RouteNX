@@ -1,5 +1,6 @@
 {
   "port": 8080,
+  "web-port": 3000,
   "routes": [
     {
       "host": [

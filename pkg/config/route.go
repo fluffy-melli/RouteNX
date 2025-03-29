@@ -26,6 +26,7 @@ type Route struct {
 
 type RouteNX struct {
 	Port     uint16     `json:"port"`
+	WebPort  uint16     `json:"web-port"`
 	Routes   []Route    `json:"routes"`
 	Firewall []Firewall `json:"firewall"`
 }
