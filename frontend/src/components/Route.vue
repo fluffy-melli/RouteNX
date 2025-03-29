@@ -4,7 +4,8 @@ import { ref, onMounted } from 'vue'
 const data = ref([])
 
 onMounted(async () => {
-  const response = await fetch('http://localhost:3000/route')
+  const debug = false
+  const response = await fetch(debug ? 'https://localhost:3000/route' : `${window.location.origin}/route`)
   if (response.ok) {
     data.value = await response.json()
   } else {
@@ -13,13 +14,25 @@ onMounted(async () => {
 })
 
 function getSettingClass(name, list, index) {
-  if (index === 0 && index !== list.length - 1) {
-    return `${name}-start`;
-  } else if (index !== 0 && index === list.length - 1) {
-    return `${name}-end`;
+  const isFirst = index === 0
+  const isLast = index === list.length - 1
+
+  if (isFirst && list.length === 1) {
+    return `${name}-all`
+  } else if (isFirst && !isLast) {
+    return `${name}-start`
+  } else if (isLast && !isFirst) {
+    return `${name}-end`
   } else {
-    return `${name}-all`;
+    return `${name}-none`
   }
+}
+
+function formatEndpoint(endpoint) {
+  if (endpoint.startsWith('http://') || endpoint.startsWith('https://')) {
+    return endpoint.replace(/^https?:\/\//, '')
+  }
+  return endpoint
 }
 </script>
 
@@ -46,7 +59,7 @@ function getSettingClass(name, list, index) {
           </select>
           <select>
             <option>
-              {{ item.endpoint }}
+              {{ formatEndpoint(item.endpoint) }}
             </option>
           </select>
         </div>
