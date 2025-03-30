@@ -14,9 +14,28 @@ Chart.register(
 )
 
 const data = ref([])
+const selected = ref({})
 
-const debug = false
+const debug = true
 const api = debug ? 'http://localhost:3000' : window.location.origin
+
+const baseProxyRule = {
+  "host": [
+    ""
+  ],
+  "firewall": [
+    ""
+  ],
+  "endpoint": ""
+}
+
+const baseFireWallRule = {
+  "name": "",
+  "To": false,
+  "cidr": [
+    ""
+  ]
+}
 
 onMounted(async () => {
   const response = await fetch(`${api}/route`)
@@ -101,9 +120,9 @@ async function getTraffic(chart) {
     chart.data.datasets[0].data.push(...trf["TX"])
     chart.data.datasets[1].data.push(...trf["RX"])
     if (chart.data.labels.length > 20) {
-      chart.data.labels = chart.data.labels.slice(-20);
-      chart.data.datasets[0].data = chart.data.datasets[0].data.slice(-20);
-      chart.data.datasets[1].data = chart.data.datasets[1].data.slice(-20);
+      chart.data.labels = chart.data.labels.slice(-20)
+      chart.data.datasets[0].data = chart.data.datasets[0].data.slice(-20)
+      chart.data.datasets[1].data = chart.data.datasets[1].data.slice(-20)
     }
     chart.update()
   } else {
@@ -111,20 +130,30 @@ async function getTraffic(chart) {
   }
 }
 
-function getSettingClass(name, list, index) {
-  const isFirst = index === 0
-  const isLast = index === list.length - 1
-
-  if (isFirst && list.length === 1) {
-    return `${name}-all`
-  } else if (isFirst && !isLast) {
-    return `${name}-start`
-  } else if (isLast && !isFirst) {
-    return `${name}-end`
-  } else {
-    return `${name}-none`
-  }
+function saveConfig() {
+  fetch(`${api}/config`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data.value),
+  })
+  .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to save config')
+      }
+      return response.json()
+  })
+  .then(async (response) => {
+    data.value = response
+    alert('saved')
+  })
+  .catch(error => {
+    console.error('Error:', error)
+    alert('Failed')
+  })
 }
+
 
 function formatEndpoint(endpoint) {
   if (endpoint.startsWith('http://') || endpoint.startsWith('https://')) {
@@ -132,6 +161,39 @@ function formatEndpoint(endpoint) {
   }
   return endpoint
 }
+
+function selectRule(name, index) {
+  if (selected.value[name] != null && selected.value[name] === index) {
+    selected.value = { ...selected.value, [name]: null }
+  } else {
+    selected.value = { ...selected.value, [name]: index }
+  }
+}
+
+function removeRule(name, index) {
+  if (this.selected[name] == index) {
+    selected.value = { ...selected.value, [name]: null }
+  }
+  this.data[name].splice(index, 1)
+}
+
+function addRule(name) {
+  if (name == 'routes') {
+    this.data[name].push(baseProxyRule)
+  } else {
+    this.data[name].push(baseFireWallRule)
+  }
+  this.selected[name] = this.data[name].length - 1
+}
+
+function removeItem(name, type, index) {
+  this.data[name][this.selected[name]][type].splice(index, 1)
+}
+
+function addItem(name, type) {
+  this.data[name][this.selected[name]][type].push("")
+}
+
 </script>
 
 <template>
@@ -151,33 +213,32 @@ function formatEndpoint(endpoint) {
             <th class="long">Hostname</th>
             <th class="short">Firewall</th>
             <th class="long">Endpoint</th>
-            <th class="actions">Actions</th>
-            <th></th>
+            <th class="short">Actions</th>
           </tr>
         </thead>
         <tbody v-if="data.routes">
-          <tr v-for="(item, index) in data.routes" :key="index">
+          <tr class="rule" v-for="(item, index) in data.routes" :key="index" @click="selectRule('routes', index)">
             <td>
-              <select>
+              <select class="select" @click.stop>
                 <option v-for="(item, index) in item.host" :key="index" :value="item" :disabled="index !== 0">
                   {{ item }}
                 </option>
               </select>
             </td>
             <td>
-              <select v-if="item.firewall.length > 0">
+              <select class="select" v-if="item.firewall.length > 0" @click.stop>
                 <option v-for="(item, index) in item.firewall" :key="index" :value="item" :disabled="index !== 0">
                   {{ item }}
                 </option>
               </select>
-              <select v-else>
+              <select class="select" v-else @click.stop>
                 <option>
                   x
                 </option>
               </select>
             </td>
             <td>
-              <select>
+              <select class="select" @click.stop>
                 <option>
                   {{ formatEndpoint(item.endpoint) }}
                 </option>
@@ -185,21 +246,55 @@ function formatEndpoint(endpoint) {
             </td>
             <td>
               <div class="setting">
-                <img class="remove" src="../assets/svg/remove.svg" alt="remove"/>
+                <img class="edit" src="../assets/svg/edit.svg" alt="edit"/>
+                <img @click.stop class="remove" src="../assets/svg/remove.svg" alt="remove" @click="removeRule('routes', index)"/>
               </div>
             </td>
-            <td></td>
           </tr>
-          <tr class="none">
-            <td>
-              <p class="lefts">+ Add more</p>
+          <tr class="rule-none" v-if="selected.routes != null">
+            <td colspan="4">
+              <div class="save" @click="saveConfig">
+                <img src="../assets/svg/save.svg"/>
+              </div>
+              <div class="extra">
+                <div class="plus">
+                  <img src="../assets/svg/plus.svg" @click="addItem('routes', 'host')"/>
+                </div>
+                <div class="menu">
+                  <p class="title">Hostname</p>
+                  <div class="edit" v-for="(item, index) in data.routes[selected.routes].host" :key="index">
+                    <input class="left" v-model="data.routes[selected.routes].host[index]"/>
+                    <img class="remove" src="../assets/svg/remove.svg" alt="remove" @click="removeItem('routes', 'host', index)"/>
+                  </div>
+                </div>
+                <div class="plus">
+                  <img src="../assets/svg/plus.svg" @click="addItem('routes','firewall')"/>
+                </div>
+                <div class="menu">
+                  <p class="title">Firewall</p>
+                  <div class="edit" v-for="(item, index) in data.routes[selected.routes].firewall" :key="index">
+                    <input class="left" v-model="data.routes[selected.routes].firewall[index]"/>
+                    <img class="remove" src="../assets/svg/remove.svg" alt="remove" @click="removeItem('routes', 'firewall', index)"/>
+                  </div>
+                </div>
+                <div class="plus"></div>
+                <div class="menu">
+                  <p class="title">Endpoint</p>
+                  <div class="edit">
+                    <input v-model="data.routes[selected.routes].endpoint"/>
+                  </div>
+                </div>
+              </div>
             </td>
-            <td></td>
-            <td></td>
+          </tr>
+          <tr class="rule-none">
             <td>
-              <p class="actions">{{ data.routes.length }}</p>
+              <p @click="addRule('routes')" class="lefts">+ Add more</p>
             </td>
-            <td></td>
+            <td colspan="2"></td>
+            <td>
+              <p class="center">{{ data.routes.length }}</p>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -214,21 +309,20 @@ function formatEndpoint(endpoint) {
             <th class="long">Rulename</th>
             <th class="short">To</th>
             <th class="long">CIDR</th>
-            <th class="actions">Actions</th>
-            <th></th>
+            <th class="short">Actions</th>
           </tr>
         </thead>
         <tbody v-if="data.firewall">
-          <tr v-for="(item, index) in data.firewall" :key="index">
+          <tr class="rule" v-for="(item, index) in data.firewall" :key="index" @click="selectRule('firewall', index)">
             <td>
-              <select>
+              <select class="select">
                 <option>
                   {{ item.name }}
                 </option>
               </select>
             </td>
             <td>
-              <select>
+              <select class="select">
                 <option v-if="!item.block">
                   Allow
                 </option>
@@ -238,7 +332,7 @@ function formatEndpoint(endpoint) {
               </select>
             </td>
             <td>
-              <select>
+              <select class="select">
                 <option v-for="(item, index) in item.cidr" :key="index" :value="item" :disabled="index !== 0">
                   {{ item }}
                 </option>
@@ -246,21 +340,53 @@ function formatEndpoint(endpoint) {
             </td>
             <td>
               <div class="setting">
-                <img class="remove" src="../assets/svg/remove.svg" alt="remove"/>
+                <img class="edit" src="../assets/svg/edit.svg" alt="edit"/>
+                <img @click.stop class="remove" src="../assets/svg/remove.svg" alt="remove" @click="removeRule('firewall', index)"/>
               </div>
             </td>
-            <td></td>
           </tr>
-          <tr class="none">
-            <td>
-              <p class="lefts">+ Add more</p>
+          <tr class="rule-none" v-if="selected.firewall != null">
+            <td colspan="4">
+              <div class="save" @click="saveConfig">
+                <img src="../assets/svg/save.svg"/>
+              </div>
+              <div class="extra">
+                <div class="menu">
+                  <p class="title">Rulename</p>
+                  <div class="edit">
+                    <input v-model="data.firewall[selected.firewall].name"/>
+                  </div>
+                </div>
+                <div class="plus"></div>
+                <div class="menu">
+                  <p class="title">To</p>
+                  <select v-model="data.firewall[selected.firewall].block" class="to-select">
+                    <option :value="false">Allow</option>
+                    <option :value="true">Block</option>
+                  </select>
+                </div>
+                <div class="plus">
+                  <img src="../assets/svg/plus.svg" @click="addItem('firewall','cidr')"/>
+                </div>
+                <div class="menu">
+                  <p class="title">CIDR</p>
+                  <div class="edit" v-for="(item, index) in data.firewall[selected.firewall].cidr" :key="index">
+                    <input class="left" v-model="data.firewall[selected.firewall].cidr[index]"/>
+                    <img class="remove" src="../assets/svg/remove.svg" alt="remove" @click="removeItem('firewall', 'cidr', index)"/>
+                  </div>
+                </div>
+                <div class="plus"></div>
+              </div>
             </td>
-            <td></td>
-            <td></td>
+          </tr>
+          <tr class="rule-none">
             <td>
-              <p class="actions">{{ data.firewall.length }}</p>
+              <p @click="addRule('firewall')" class="lefts">+ Add more</p>
             </td>
-            <td></td>
+            <td colspan="2"></td>
+            <td>
+              <p class="center">{{ data.routes.length }}</p>
+            </td>
           </tr>
         </tbody>
       </table>

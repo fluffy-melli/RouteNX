@@ -12,6 +12,7 @@ func Router() *gin.Engine {
 	r.Use(cors.Default())
 	r.GET("/route", handler.GetConfig)
 	r.GET("/traffic", handler.GetTraffc)
+	r.PUT("/config", handler.PutConfig)
 	r.Static("/static", "./dist")
 	r.NoRoute(func(c *gin.Context) {
 		c.File("./dist/index.html")
