@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"net"
@@ -11,32 +12,34 @@ import (
 	"github.com/fluffy-melli/RouteNX/pkg/tcp"
 )
 
-func HTTP(conn net.Conn, buffer []byte, target string) {
+func HTTP(conn net.Conn, buffer []byte, target string) []byte {
 	_, urls, err := tcp.Data(buffer)
 	if err != nil {
-		conn.Write([]byte(status.S400 + status.ETR))
-		return
+		return []byte(status.S400 + status.ETR)
 	}
 
 	resp, err := request.HTTP(urls[0], fmt.Sprintf("%s%s", target, urls[1]), nil, nil)
 	if err != nil {
-		conn.Write([]byte(status.S500 + status.ETR))
-		return
+		return []byte(status.S500 + status.ETR)
 	}
 	defer resp.Body.Close()
 
-	conn.Write(fmt.Appendf([]byte{}, "%s %d %s\r\n", urls[2], resp.StatusCode, http.StatusText(resp.StatusCode)))
+	var buf bytes.Buffer
+
+	fmt.Fprintf(&buf, "%s %d %s\r\n", resp.Proto, resp.StatusCode, http.StatusText(resp.StatusCode))
 
 	for key, values := range resp.Header {
 		for _, value := range values {
-			conn.Write(fmt.Appendf([]byte{}, "%s: %s\r\n", key, value))
+			fmt.Fprintf(&buf, "%s: %s\r\n", key, value)
 		}
 	}
 
-	conn.Write([]byte("\r\n"))
+	buf.WriteString("\r\n")
 
-	_, err = io.Copy(conn, resp.Body)
+	_, err = io.Copy(&buf, resp.Body)
 	if err != nil {
-		conn.Write([]byte(status.S500 + status.ETR))
+		return []byte(status.S500 + status.ETR)
 	}
+
+	return buf.Bytes()
 }

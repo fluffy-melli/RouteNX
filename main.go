@@ -29,6 +29,8 @@ func main() {
 		router.Run(fmt.Sprintf(":%d", cache.Config.WebPort))
 	}()
 
+	go middleware.BPS()
+
 	for {
 		conn, err := listener.Accept()
 		if err != nil {

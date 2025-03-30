@@ -15,24 +15,26 @@ func Listener(conn net.Conn) {
 
 	req, err := tcp.Receive(conn)
 	if err != nil {
-		conn.Write([]byte(status.S500 + status.ETR))
+		Transmit(conn, []byte(status.S500+status.ETR))
 		return
 	}
+
+	Receive(req)
 
 	switch tcp.Protocol(req) {
 	case "HTTP":
 		route := cache.Config.GetRoute(tcp.Host(req))
 		if route == nil {
-			conn.Write([]byte(status.S400 + status.ETR + "No Route"))
+			Transmit(conn, []byte(status.S400+status.ETR+"No Route"))
 			return
 		}
 		ips := strings.Split(conn.RemoteAddr().String(), ":")
 		if cache.Config.IsBlock(route, ips[0]) {
-			conn.Write([]byte(status.S400 + status.ETR + "CIDR IP BAN"))
+			Transmit(conn, []byte(status.S400+status.ETR+"CIDR IP BAN"))
 			return
 		}
-		proxy.HTTP(conn, req, route.Endpoint)
+		Transmit(conn, proxy.HTTP(conn, req, route.Endpoint))
 	default:
-		conn.Write([]byte(status.S400 + status.ETR))
+		Transmit(conn, []byte(status.S400+status.ETR))
 	}
 }

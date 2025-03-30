@@ -9,9 +9,10 @@ import (
 func Router() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
-	r.Static("/static", "./dist")
 	r.Use(cors.Default())
 	r.GET("/route", handler.GetConfig)
+	r.GET("/traffic", handler.GetTraffc)
+	r.Static("/static", "./dist")
 	r.NoRoute(func(c *gin.Context) {
 		c.File("./dist/index.html")
 	})
