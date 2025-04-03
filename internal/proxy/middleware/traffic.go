@@ -41,12 +41,14 @@ func MeasureTraffic(cache *cache.Cache) gin.HandlerFunc {
 }
 
 func Traffic(cache *cache.Cache) {
-	ticker := time.NewTicker(30 * time.Second)
+	sleep := 30
+
+	ticker := time.NewTicker(time.Duration(sleep) * time.Second)
 	defer ticker.Stop()
 
 	for range ticker.C {
-		rxBps := atomic.SwapInt64(&cache.RX, 0) * 8
-		txBps := atomic.SwapInt64(&cache.TX, 0) * 8
+		rxBps := (atomic.SwapInt64(&cache.RX, 0) * 8) / int64(sleep)
+		txBps := (atomic.SwapInt64(&cache.TX, 0) * 8) / int64(sleep)
 		now := time.Now().UnixMilli()
 
 		cache.Lock()

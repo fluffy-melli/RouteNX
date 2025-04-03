@@ -116,15 +116,9 @@ async function getTraffic(chart) {
   const response = await fetch(`${api}/traffic`)
   if (response.ok) {
     const trf = await response.json()
-    console.log(trf)
-    chart.data.labels.push(...trf["Label"])
-    chart.data.datasets[0].data.push(...trf["TX"])
-    chart.data.datasets[1].data.push(...trf["RX"])
-    if (chart.data.labels.length > 20) {
-      chart.data.labels = chart.data.labels.slice(-20)
-      chart.data.datasets[0].data = chart.data.datasets[0].data.slice(-20)
-      chart.data.datasets[1].data = chart.data.datasets[1].data.slice(-20)
-    }
+    chart.data.labels = trf["Label"].slice(-20)
+    chart.data.datasets[0].data = trf["TX"].slice(-20)
+    chart.data.datasets[1].data = trf["RX"].slice(-20)
     chart.update()
   } else {
     console.error('Failed to fetch data')
@@ -172,27 +166,27 @@ function selectRule(name, index) {
 }
 
 function removeRule(name, index) {
-  if (this.selected[name] == index) {
+  if (selected.value[name] == index) {
     selected.value = { ...selected.value, [name]: null }
   }
-  this.data[name].splice(index, 1)
+  data.value[name].splice(index, 1)
 }
 
 function addRule(name) {
   if (name == 'routes') {
-    this.data[name].push(baseProxyRule)
+    data.value[name].push(baseProxyRule)
   } else {
-    this.data[name].push(baseFireWallRule)
+    data.value[name].push(baseFireWallRule)
   }
-  this.selected[name] = this.data[name].length - 1
+  selected.value[name] = data.value[name].length - 1
 }
 
 function removeItem(name, type, index) {
-  this.data[name][this.selected[name]][type].splice(index, 1)
+  data.value[name][selected.value[name]][type].splice(index, 1)
 }
 
 function addItem(name, type) {
-  this.data[name][this.selected[name]][type].push("")
+  data.value[name][selected.value[name]][type].push("")
 }
 
 </script>
