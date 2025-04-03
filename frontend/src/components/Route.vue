@@ -16,7 +16,7 @@ Chart.register(
 const data = ref([])
 const selected = ref({})
 
-const debug = false
+const debug = true
 const api = debug ? 'http://localhost:3000' : window.location.origin
 
 const baseProxyRule = {
@@ -38,7 +38,7 @@ const baseFireWallRule = {
 }
 
 onMounted(async () => {
-  const response = await fetch(`${api}/route`)
+  const response = await fetch(`${api}/config`)
   if (response.ok) {
     data.value = await response.json()
   } else {
@@ -106,9 +106,10 @@ onMounted(async () => {
       },
     },
   })
+  getTraffic(chart)
   setInterval(() => {
     getTraffic(chart)
-  }, 1500)
+  }, 30 * 1000)
 })
 
 async function getTraffic(chart) {
@@ -210,9 +211,9 @@ function addItem(name, type) {
       <table class="styled-table">
         <thead>
           <tr>
-            <th class="long">Hostname</th>
-            <th class="short">Firewall</th>
-            <th class="long">Endpoint</th>
+            <th class="long-4">Hostname</th>
+            <th class="long-4">Firewall</th>
+            <th class="long-4">Endpoint</th>
             <th class="short">Actions</th>
           </tr>
         </thead>
@@ -252,7 +253,7 @@ function addItem(name, type) {
             </td>
           </tr>
           <tr class="rule-none" v-if="selected.routes != null">
-            <td colspan="4">
+            <td colspan="3">
               <div class="save" @click="saveConfig">
                 <img src="../assets/svg/save.svg"/>
               </div>
@@ -306,33 +307,33 @@ function addItem(name, type) {
       <table class="styled-table">
         <thead>
           <tr>
-            <th class="long">Rulename</th>
-            <th class="short">To</th>
-            <th class="long">CIDR</th>
+            <th class="long-4">Rulename</th>
+            <th class="long-4">To</th>
+            <th class="long-4">CIDR</th>
             <th class="short">Actions</th>
           </tr>
         </thead>
         <tbody v-if="data.firewall">
           <tr class="rule" v-for="(item, index) in data.firewall" :key="index" @click="selectRule('firewall', index)">
             <td>
-              <select class="select">
+              <select class="select" @click.stop>
                 <option>
                   {{ item.name }}
                 </option>
               </select>
             </td>
             <td>
-              <select class="select">
+              <select class="select" @click.stop>
                 <option v-if="!item.block">
                   Allow
                 </option>
-                <option v-else>
+                <option v-else @click.stop>
                   Block
                 </option>
               </select>
             </td>
             <td>
-              <select class="select">
+              <select class="select" @click.stop>
                 <option v-for="(item, index) in item.cidr" :key="index" :value="item" :disabled="index !== 0">
                   {{ item }}
                 </option>
@@ -346,7 +347,7 @@ function addItem(name, type) {
             </td>
           </tr>
           <tr class="rule-none" v-if="selected.firewall != null">
-            <td colspan="4">
+            <td colspan="3">
               <div class="save" @click="saveConfig">
                 <img src="../assets/svg/save.svg"/>
               </div>
@@ -385,7 +386,7 @@ function addItem(name, type) {
             </td>
             <td colspan="2"></td>
             <td>
-              <p class="center">{{ data.routes.length }}</p>
+              <p class="center">{{ data.firewall.length }}</p>
             </td>
           </tr>
         </tbody>
