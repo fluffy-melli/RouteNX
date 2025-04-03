@@ -19,7 +19,7 @@ func Proxy(cache *cache.Cache) gin.HandlerFunc {
 			return
 		}
 
-		if firewall.IsCidrBlock(cache.Config, to, c.ClientIP()) {
+		if firewall.IsCidrBlock(cache.Config, to, c.RemoteIP()) {
 			c.JSON(http.StatusForbidden, gin.H{"error": "CIDR IP Block"})
 			return
 		}
