@@ -5,6 +5,7 @@ import (
 
 	"github.com/fluffy-melli/RouteNX/pkg/cache"
 	"github.com/fluffy-melli/RouteNX/pkg/config"
+	"github.com/fluffy-melli/RouteNX/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
 
@@ -31,6 +32,7 @@ func PutConfig(cache *cache.Cache) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var configs config.RouteNX
 		if err := c.ShouldBindJSON(&configs); err != nil {
+			logger.WARNING("%s", err.Error())
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}

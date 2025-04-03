@@ -6,6 +6,7 @@ import (
 
 	"github.com/fluffy-melli/RouteNX/pkg/cache"
 	"github.com/fluffy-melli/RouteNX/pkg/firewall"
+	"github.com/fluffy-melli/RouteNX/pkg/logger"
 	"github.com/fluffy-melli/RouteNX/pkg/request"
 	"github.com/gin-gonic/gin"
 )
@@ -25,6 +26,7 @@ func Proxy(cache *cache.Cache) gin.HandlerFunc {
 
 		req, err := request.HTTP(c, to.Endpoint)
 		if err != nil {
+			logger.WARNING("%s", err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
@@ -32,6 +34,7 @@ func Proxy(cache *cache.Cache) gin.HandlerFunc {
 		client := &http.Client{}
 		resp, err := client.Do(req)
 		if err != nil {
+			logger.WARNING("%s", err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
@@ -47,6 +50,7 @@ func Proxy(cache *cache.Cache) gin.HandlerFunc {
 
 		_, err = io.Copy(c.Writer, resp.Body)
 		if err != nil {
+			logger.WARNING("%s", err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		}
 	}
