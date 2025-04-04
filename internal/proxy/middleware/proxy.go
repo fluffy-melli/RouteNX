@@ -3,6 +3,7 @@ package middleware
 import (
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/fluffy-melli/RouteNX/pkg/cache"
 	"github.com/fluffy-melli/RouteNX/pkg/firewall"
@@ -20,6 +21,12 @@ func Proxy(cache *cache.Cache) gin.HandlerFunc {
 		}
 
 		if firewall.IsCidrBlock(cache.Config, to, c.RemoteIP()) {
+			cache.Logger.AddBlockLog(logger.BlockLogger{
+				OriginIP:  c.ClientIP(),
+				ForwordIP: c.RemoteIP(),
+				Host:      c.Request.Host,
+				Time:      time.Now().Format(time.RFC3339),
+			})
 			c.JSON(http.StatusForbidden, gin.H{"error": "CIDR IP Block"})
 			return
 		}

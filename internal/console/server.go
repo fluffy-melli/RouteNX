@@ -14,6 +14,7 @@ func Router(cache *cache.Cache) *gin.Engine {
 	r.GET("/config", handler.GetConfig(cache))
 	r.PUT("/config", handler.PutConfig(cache))
 	r.GET("/traffic", handler.GetTraffic(cache))
+	r.GET("/logger", handler.GetLogger(cache))
 	r.Static("/static", "./dist")
 	r.NoRoute(func(c *gin.Context) {
 		c.File("./dist/index.html")

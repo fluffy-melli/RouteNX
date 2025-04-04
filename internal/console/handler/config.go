@@ -28,6 +28,15 @@ func GetTraffic(cache *cache.Cache) gin.HandlerFunc {
 	}
 }
 
+func GetLogger(cache *cache.Cache) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		cache.Lock()
+		defer cache.Unlock()
+
+		c.JSON(http.StatusOK, cache.Logger)
+	}
+}
+
 func PutConfig(cache *cache.Cache) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var configs config.RouteNX

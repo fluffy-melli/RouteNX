@@ -5,10 +5,12 @@ import (
 	"sync/atomic"
 
 	"github.com/fluffy-melli/RouteNX/pkg/config"
+	"github.com/fluffy-melli/RouteNX/pkg/logger"
 )
 
 type Cache struct {
 	sync.Mutex
+	Logger *logger.Logger
 	Config *config.RouteNX
 	Label  []int64
 	RXBPS  []int64
@@ -26,6 +28,7 @@ func NewCache() *Cache {
 	}
 
 	return &Cache{
+		Logger: logger.NewLogger(),
 		Config: cfg,
 	}
 }

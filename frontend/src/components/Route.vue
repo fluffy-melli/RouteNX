@@ -14,6 +14,7 @@ Chart.register(
 )
 
 const data = ref([])
+const logger = ref([])
 const selected = ref({})
 
 const debug = false
@@ -106,8 +107,10 @@ onMounted(async () => {
       },
     },
   })
+  getLogger()
   getTraffic(chart)
   setInterval(() => {
+    getLogger()
     getTraffic(chart)
   }, 30 * 1000)
 })
@@ -120,6 +123,16 @@ async function getTraffic(chart) {
     chart.data.datasets[0].data = trf["TX"].slice(-20)
     chart.data.datasets[1].data = trf["RX"].slice(-20)
     chart.update()
+  } else {
+    console.error('Failed to fetch data')
+  }
+}
+
+async function getLogger() {
+  const response = await fetch(`${api}/logger`)
+  if (response.ok) {
+    const data = await response.json()
+    logger.value = data
   } else {
     console.error('Failed to fetch data')
   }
@@ -389,6 +402,14 @@ function addItem(name, type) {
     <div class="line"></div>
     <div class="container">
       <canvas id="traffic"></canvas>
+    </div>
+    <div class="line"></div>
+    <div class="container">
+      <div>
+        <pre>Firewall block log</pre>
+        <pre>time | host | forword-ip | origin-ip</pre>
+        <pre v-for="(item, index) in logger.block" :key="index">{{ item.time }}: {{ item.host }} {{ item.forword_ip }} {{ item.origin_ip }}</pre>
+      </div>
     </div>
   </div>
 </template>

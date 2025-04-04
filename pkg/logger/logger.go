@@ -6,6 +6,27 @@ import (
 	"regexp"
 )
 
+type BlockLogger struct {
+	OriginIP  string `json:"origin_ip"`
+	ForwordIP string `json:"forword_ip"`
+	Host      string `json:"host"`
+	Time      string `json:"time"`
+}
+
+type Logger struct {
+	Block []BlockLogger `json:"block"`
+}
+
+func (l *Logger) AddBlockLog(block BlockLogger) {
+	l.Block = append(l.Block, block)
+}
+
+func NewLogger() *Logger {
+	return &Logger{
+		Block: make([]BlockLogger, 0),
+	}
+}
+
 var colorMap = map[string]string{
 	"red":    "\033[31m",
 	"green":  "\033[32m",
