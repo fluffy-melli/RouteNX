@@ -29,6 +29,8 @@ func HTTP(c *gin.Context, endpoint string) (*http.Request, error) {
 	req.URL.Host = target.Host
 	req.URL.Path = c.Param("all")
 	req.URL.Scheme = target.Scheme
+	req.URL.RawQuery = c.Request.URL.RawQuery
+	req.URL.Fragment = c.Request.URL.Fragment
 	req.Header.Set("X-Real-IP", c.ClientIP())
 
 	c.Request.Body = io.NopCloser(bytes.NewReader(body))
