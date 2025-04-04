@@ -1,7 +1,8 @@
 <script setup>
+import { useI18n } from 'vue-i18n'
 import { ref, onMounted } from 'vue'
 import { Chart, LinearScale, CategoryScale, LineElement, PointElement, Title, Tooltip, Legend, LineController } from 'chart.js'
-
+const { locale, t } = useI18n({ useScope: 'global' })
 Chart.register(
   LinearScale,
   CategoryScale,
@@ -82,9 +83,10 @@ onMounted(async () => {
           ticks: {
             callback: function(value) {
               const time = new Date(value)
+              const hor = time.getHours()
               const min = time.getMinutes()
               const scd = time.getSeconds()
-              return min.toString() +":"+ scd.toString()
+              return hor.toString() + ":" + min.toString() +":"+ scd.toString()
             }
           }
         },
@@ -213,15 +215,15 @@ function addItem(name, type) {
       </div>
     </div>
     <div class="container">
-      <h2 class="title">Reverse Proxy</h2>
-      <p class="description">List of available routes and proxy settings</p>
+      <h2 class="title">{{ t('proxyTitle') }}</h2>
+      <p class="description">{{ t('proxyDescription') }}</p>
       <table class="styled-table">
         <thead>
           <tr>
-            <th class="long-4">Hostname</th>
-            <th class="long-4">Firewall</th>
-            <th class="long-4">Endpoint</th>
-            <th class="short">Actions</th>
+            <th class="long-4">{{ t('hostname') }}</th>
+            <th class="long-4">{{ t('firewall') }}</th>
+            <th class="long-4">{{ t('endpoint') }}</th>
+            <th class="short">{{ t('actions') }}</th>
           </tr>
         </thead>
         <tbody v-if="data.routes">
@@ -269,7 +271,7 @@ function addItem(name, type) {
                   <img src="../assets/svg/plus.svg" @click="addItem('routes', 'host')"/>
                 </div>
                 <div class="menu">
-                  <p class="title">Hostname</p>
+                  <p class="title">{{ t('hostname') }}</p>
                   <div class="edit" v-for="(item, index) in data.routes[selected.routes].host" :key="index">
                     <input class="left" v-model="data.routes[selected.routes].host[index]"/>
                     <img class="remove" src="../assets/svg/remove.svg" alt="remove" @click="removeItem('routes', 'host', index)"/>
@@ -279,7 +281,7 @@ function addItem(name, type) {
                   <img src="../assets/svg/plus.svg" @click="addItem('routes','firewall')"/>
                 </div>
                 <div class="menu">
-                  <p class="title">Firewall</p>
+                  <p class="title">{{ t('firewall') }}</p>
                   <div class="edit" v-for="(item, index) in data.routes[selected.routes].firewall" :key="index">
                     <input class="left" v-model="data.routes[selected.routes].firewall[index]"/>
                     <img class="remove" src="../assets/svg/remove.svg" alt="remove" @click="removeItem('routes', 'firewall', index)"/>
@@ -287,7 +289,7 @@ function addItem(name, type) {
                 </div>
                 <div class="plus"></div>
                 <div class="menu">
-                  <p class="title">Endpoint</p>
+                  <p class="title">{{ t('endpoint') }}</p>
                   <div class="edit">
                     <input v-model="data.routes[selected.routes].endpoint"/>
                   </div>
@@ -297,7 +299,7 @@ function addItem(name, type) {
           </tr>
           <tr class="rule-none">
             <td>
-              <p @click="addRule('routes')" class="lefts">+ Add more</p>
+              <p @click="addRule('routes')" class="lefts">+ {{ t('addmore') }}</p>
             </td>
             <td colspan="2"></td>
             <td>
@@ -309,15 +311,15 @@ function addItem(name, type) {
     </div>
     <div class="line"></div>
     <div class="container">
-      <h2 class="title">Firewall</h2>
-      <p class="description">List of firewall rules</p>
+      <h2 class="title">{{ t('firewallTitle') }}</h2>
+      <p class="description">{{ t('firewallDescription') }}</p>
       <table class="styled-table">
         <thead>
           <tr>
-            <th class="long-4">Rulename</th>
-            <th class="long-4">To</th>
+            <th class="long-4">{{ t('rulename') }}</th>
+            <th class="long-4">{{ t('packet') }}</th>
             <th class="long-4">CIDR</th>
-            <th class="short">Actions</th>
+            <th class="short">{{ t('actions') }}</th>
           </tr>
         </thead>
         <tbody v-if="data.firewall">
@@ -332,10 +334,10 @@ function addItem(name, type) {
             <td>
               <select class="select" @click.stop>
                 <option v-if="!item.block">
-                  Allow
+                  {{ t('allow') }}
                 </option>
                 <option v-else @click.stop>
-                  Block
+                  {{ t('block') }}
                 </option>
               </select>
             </td>
@@ -360,7 +362,7 @@ function addItem(name, type) {
               </div>
               <div class="extra">
                 <div class="menu">
-                  <p class="title">Rulename</p>
+                  <p class="title">{{ t('rulename') }}</p>
                   <div class="edit">
                     <input v-model="data.firewall[selected.firewall].name"/>
                   </div>
@@ -369,8 +371,12 @@ function addItem(name, type) {
                 <div class="menu">
                   <p class="title">To</p>
                   <select v-model="data.firewall[selected.firewall].block" class="to-select">
-                    <option :value="false">Allow</option>
-                    <option :value="true">Block</option>
+                    <option :value="false">
+                      {{ t('allow') }}
+                    </option>
+                    <option :value="true">
+                      {{ t('block') }}
+                    </option>
                   </select>
                 </div>
                 <div class="plus">
@@ -389,7 +395,7 @@ function addItem(name, type) {
           </tr>
           <tr class="rule-none">
             <td>
-              <p @click="addRule('firewall')" class="lefts">+ Add more</p>
+              <p @click="addRule('firewall')" class="lefts">+ {{ t('addmore') }}</p>
             </td>
             <td colspan="2"></td>
             <td>
@@ -405,10 +411,27 @@ function addItem(name, type) {
     </div>
     <div class="line"></div>
     <div class="container">
-      <div>
-        <pre>Firewall block log</pre>
-        <pre>time | host | forword-ip | origin-ip</pre>
-        <pre v-for="(item, index) in logger.block" :key="index">{{ item.time }}: {{ item.host }} {{ item.forword_ip }} {{ item.origin_ip }}</pre>
+      <div class="log">
+        <pre>{{ t('errorLog') }}</pre>
+        <pre>{{ t('time') }} | {{ t('error') }}</pre>
+        <pre v-for="(item, index) in logger.error" :key="index">{{ item.time }}: {{ item.host }} {{ item.forward_ip }} {{ item.origin_ip }}</pre>
+        <pre></pre>
+        <pre>{{ t('firewallBlockLog') }}</pre>
+        <pre>{{ t('time') }} | {{ t('host') }} | {{ t('forwardIp') }} | {{ t('originIp') }}</pre>
+        <pre v-for="(item, index) in logger.block" :key="index">{{ item.time }}: {{ item.host }} {{ item.forward_ip }} {{ item.origin_ip }}</pre>
+      </div>
+    </div>
+    <div class="line"></div>
+    <div class="container">
+      <div class="center">
+        <select v-model="locale" class="lang">
+          <option value="kr">
+            KR
+          </option>
+          <option value="en">
+            EN
+          </option>
+        </select>
       </div>
     </div>
   </div>

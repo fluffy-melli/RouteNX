@@ -23,7 +23,7 @@ func Proxy(cache *cache.Cache) gin.HandlerFunc {
 		if firewall.IsCidrBlock(cache.Config, to, c.RemoteIP()) {
 			cache.Logger.AddBlockLog(logger.BlockLogger{
 				OriginIP:  c.ClientIP(),
-				ForwordIP: c.RemoteIP(),
+				ForwardIP: c.RemoteIP(),
 				Host:      c.Request.Host,
 				Time:      time.Now().Format(time.RFC3339),
 			})
@@ -33,6 +33,10 @@ func Proxy(cache *cache.Cache) gin.HandlerFunc {
 
 		req, err := request.HTTP(c, to.Endpoint)
 		if err != nil {
+			cache.Logger.AddErrorLog(logger.ErrorLogger{
+				Error: err.Error(),
+				Time:  time.Now().Format(time.RFC3339),
+			})
 			logger.WARNING("%s", err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -41,6 +45,10 @@ func Proxy(cache *cache.Cache) gin.HandlerFunc {
 		client := &http.Client{}
 		resp, err := client.Do(req)
 		if err != nil {
+			cache.Logger.AddErrorLog(logger.ErrorLogger{
+				Error: err.Error(),
+				Time:  time.Now().Format(time.RFC3339),
+			})
 			logger.WARNING("%s", err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -57,6 +65,10 @@ func Proxy(cache *cache.Cache) gin.HandlerFunc {
 
 		_, err = io.Copy(c.Writer, resp.Body)
 		if err != nil {
+			cache.Logger.AddErrorLog(logger.ErrorLogger{
+				Error: err.Error(),
+				Time:  time.Now().Format(time.RFC3339),
+			})
 			logger.WARNING("%s", err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		}
