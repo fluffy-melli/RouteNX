@@ -30,7 +30,7 @@ jobs:
 
     - name: Run Docker container
       run: |
-        docker run -d -p 8080:8080 -p 3000:3000 routenx
+        docker run -d -p 80:80 -p 443:443 -p 3000:3000 routenx
 
     - name: Check Docker container status
       run: |

@@ -34,15 +34,15 @@ func main() {
 			logger.INFO("Proxy server (ssl) at {blue}https://localhost:%d{reset}", cache.Config.SSLPort)
 			go func(SSL *ssl.SSL) {
 				for {
+					time.Sleep(60 * 24 * time.Hour)
 					if err := SSL.Renew(); err != nil {
 						logger.ERROR("Failed to renew SSL certificate: %s", err.Error())
 					} else {
 						logger.INFO("SSL certificate successfully renewed")
 					}
-					time.Sleep(60 * 24 * time.Hour)
 				}
 			}(SSL)
-			if err := SSL.ApplyToGin(router, fmt.Sprintf(":%d", cache.Config.SSLPort), cache.Config.SSL.Domain); err != nil {
+			if err := SSL.ApplyToGin(router, fmt.Sprintf(":%d", cache.Config.SSLPort)); err != nil {
 				logger.ERROR("Proxy server (ssl) failed to start: %s", err.Error())
 				return
 			}

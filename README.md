@@ -102,13 +102,17 @@ To enable SSL for secure communication, you can configure the proxy server with 
 #### **SSL Configuration**
 - **Enabled:** Set to `true` to activate SSL.
 - **Email:** Email address for SSL certificate registration.
-- **Domain:** Domain for which the SSL certificate is issued.
+- **Domains:** Domain for which the SSL certificate is issued.
 
 ```json
 "ssl": {
   "enabled": true,
   "email": "example@example.com",
-  "domains": "example.com"
+  "domains": [
+    "example.com",
+    "example0.example.com",
+    "example1.example.com"
+  ]
 }
 ```
 

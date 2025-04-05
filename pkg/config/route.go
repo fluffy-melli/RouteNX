@@ -24,9 +24,9 @@ type Route struct {
 }
 
 type SSL struct {
-	Enabled bool   `json:"enabled"`
-	Email   string `json:"email"`
-	Domain  string `json:"domain"`
+	Enabled bool     `json:"enabled"`
+	Email   string   `json:"email"`
+	Domain  []string `json:"domain"`
 }
 
 type RouteNX struct {
@@ -40,13 +40,13 @@ type RouteNX struct {
 
 func NewRouteNX() *RouteNX {
 	return &RouteNX{
-		Port:    8080,
-		SSLPort: 8443,
+		Port:    80,
+		SSLPort: 443,
 		WebPort: 3000,
 		SSL: SSL{
 			Enabled: false,
 			Email:   "",
-			Domain:  "",
+			Domain:  make([]string, 0),
 		},
 		Routes:   make([]Route, 0),
 		Firewall: make([]Firewall, 0),

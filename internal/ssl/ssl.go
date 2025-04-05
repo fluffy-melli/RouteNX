@@ -16,7 +16,7 @@ import (
 
 type SSL struct {
 	Email        string
-	Domain       string
+	Domain       []string
 	Registration *registration.Resource
 	key          crypto.PrivateKey
 }
@@ -33,7 +33,7 @@ func (u *SSL) GetPrivateKey() crypto.PrivateKey {
 	return u.key
 }
 
-func NewSSL(domain string, email string) (*SSL, error) {
+func NewSSL(domain []string, email string) (*SSL, error) {
 	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		return nil, err
@@ -66,7 +66,7 @@ func NewSSL(domain string, email string) (*SSL, error) {
 	ssl.Registration = reg
 
 	request := certificate.ObtainRequest{
-		Domains: []string{domain},
+		Domains: domain,
 		Bundle:  true,
 	}
 
@@ -88,7 +88,7 @@ func (ssl *SSL) Renew() error {
 	}
 
 	request := certificate.ObtainRequest{
-		Domains: []string{ssl.Domain},
+		Domains: ssl.Domain,
 		Bundle:  true,
 	}
 
@@ -114,6 +114,6 @@ func (ssl *SSL) Renew() error {
 	return nil
 }
 
-func (ssl *SSL) ApplyToGin(router *gin.Engine, addr string, domain string) error {
+func (ssl *SSL) ApplyToGin(router *gin.Engine, addr string) error {
 	return router.RunTLS(addr, "cert.pem", "cert.key")
 }

@@ -4,8 +4,12 @@
   "web-port": 3000,
   "ssl": {
     "enabled": false,
-    "email": "",
-    "domain": ""
+    "email": "example@example.com",
+    "domain": [
+      "example.com",
+      "example0.example.com",
+      "example1.example.com"
+    ]
   },
   "routes": [
     {
