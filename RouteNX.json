@@ -1,6 +1,12 @@
 {
-  "port": 8080,
+  "port": 80,
+  "ssl-port": 443,
   "web-port": 3000,
+  "ssl": {
+    "enabled": false,
+    "email": "",
+    "domain": ""
+  },
   "routes": [
     {
       "host": [

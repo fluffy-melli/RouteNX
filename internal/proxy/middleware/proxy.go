@@ -74,3 +74,13 @@ func Proxy(cache *cache.Cache) gin.HandlerFunc {
 		}
 	}
 }
+
+func SSLRedirect(c *gin.Context) {
+	if c.Request.TLS == nil {
+		target := "https://" + c.Request.Host + c.Request.URL.String()
+		c.Redirect(http.StatusMovedPermanently, target)
+		c.Abort()
+		return
+	}
+	c.Next()
+}

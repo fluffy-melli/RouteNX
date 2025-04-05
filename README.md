@@ -15,7 +15,7 @@ This command will create an image named `routenx` using the Dockerfile in the cu
 After building the image, you can run the container with this command:
 
 ```sh
-docker run -d -p 8080:8080 -p 3000:3000 routenx
+docker run -p 80:80 -p 443:443 -p 3000:3000 routenx
 ```
 
 ---
@@ -26,14 +26,18 @@ This configuration defines a proxy server with specific routing and firewall rul
 
 ### Configuration Breakdown
 
-#### 1. **Port**
-- The proxy server listens on port `8080`.
+### 1. **Port**
+- The proxy server listens on port `80`.
+- The proxy server (ssl) listens on port `443`.
+- The web console server listens on port `3000`.
 
 ```json
-"port": 8080
+"port": 80,
+"ssl-port": 443,
+"web-port": 3000
 ```
 
-#### 2. **Routes**
+### 2. **Routes**
 This section defines the routing rules for incoming requests.
 
 - **Route 1:**
@@ -90,6 +94,40 @@ This section defines the routing rules for incoming requests.
   }
 ]
 ```
+
+### 4. **SSL Configuration**
+
+To enable SSL for secure communication, you can configure the proxy server with SSL certificates. Below is an example of how to set up SSL.
+
+#### **SSL Configuration**
+- **Enabled:** Set to `true` to activate SSL.
+- **Email:** Email address for SSL certificate registration.
+- **Domain:** Domain for which the SSL certificate is issued.
+
+```json
+"ssl": {
+  "enabled": true,
+  "email": "example@example.com",
+  "domains": "example.com"
+}
+```
+
+#### **Explanation**
+- `"enabled": true` ensures SSL is activated.
+- `"email"` specifies the email address used for SSL certificate registration.
+- `"domain"` specifies the domain covered by the SSL certificate.
+
+#### **Example Usage**
+Once SSL is configured, the proxy server will automatically handle SSL certificates for the specified domains. Ensure the email and domain values are accurate.
+
+### Summary of SSL Configuration
+
+- Enables secure HTTPS communication.
+- Automatically manages SSL certificates for specified domains.
+- Requires a valid email address for certificate registration.
+- Listens on port `8443` for encrypted traffic.
+
+> ⚠️ Make sure to replace `example@example.com` and `example.com` with your actual email address and domain(s).
 
 ---
 

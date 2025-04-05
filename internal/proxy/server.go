@@ -11,5 +11,8 @@ func Router(cache *cache.Cache) *gin.Engine {
 	r := gin.New()
 	r.Use(middleware.MeasureTraffic(cache))
 	r.Any("/*all", middleware.Proxy(cache))
+	if cache.Config.SSL.Enabled {
+		r.Use(middleware.SSLRedirect)
+	}
 	return r
 }

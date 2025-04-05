@@ -23,16 +23,31 @@ type Route struct {
 	Endpoint string   `json:"endpoint"`
 }
 
+type SSL struct {
+	Enabled bool   `json:"enabled"`
+	Email   string `json:"email"`
+	Domain  string `json:"domain"`
+}
+
 type RouteNX struct {
 	Port     uint16     `json:"port"`
+	SSLPort  uint16     `json:"ssl-port"`
 	WebPort  uint16     `json:"web-port"`
+	SSL      SSL        `json:"ssl"`
 	Routes   []Route    `json:"routes"`
 	Firewall []Firewall `json:"firewall"`
 }
 
 func NewRouteNX() *RouteNX {
 	return &RouteNX{
-		Port:     8080,
+		Port:    8080,
+		SSLPort: 8443,
+		WebPort: 3000,
+		SSL: SSL{
+			Enabled: false,
+			Email:   "",
+			Domain:  "",
+		},
 		Routes:   make([]Route, 0),
 		Firewall: make([]Firewall, 0),
 	}
