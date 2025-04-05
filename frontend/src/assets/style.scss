@@ -54,6 +54,13 @@ html, body {
         align-items: center;
         margin-top: 20px;
     }
+    .left-center {
+        display: flex;
+        justify-content: left;
+        align-items: center;
+        margin-top: 20px;
+        margin-left: 32px;
+    }
     .lang {
         margin-top: 0;
         appearance: auto;
@@ -90,6 +97,11 @@ html, body {
             .long-4 {
                 width: 28.3%;
                 padding-left: 20px;
+            }
+            .long-center-2 {
+                justify-content: center;
+                text-align: center;
+                width: 50%;
             }
             .short {
                 width: 15%;

@@ -9,10 +9,11 @@ import (
 func Router(cache *cache.Cache) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
-	r.Use(middleware.MeasureTraffic(cache))
-	r.Any("/*all", middleware.Proxy(cache))
 	if cache.Config.SSL.Enabled {
 		r.Use(middleware.SSLRedirect)
 	}
+	r.Use(middleware.RX(cache))
+	r.Use(middleware.TX(cache))
+	r.Any("/*all", middleware.Proxy(cache))
 	return r
 }

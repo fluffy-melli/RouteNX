@@ -2,6 +2,8 @@ package middleware
 
 import (
 	"bytes"
+	"fmt"
+	"net/http"
 	"sync/atomic"
 	"time"
 
@@ -22,21 +24,33 @@ func (w *response) Write(data []byte) (int, error) {
 	return n, err
 }
 
-func MeasureTraffic(cache *cache.Cache) gin.HandlerFunc {
+func TX(cache *cache.Cache) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		reqSize := c.Request.ContentLength
-		if reqSize < 0 {
-			body, _ := io.ReadAll(c.Request.Body)
-			reqSize = int64(len(body))
-			c.Request.Body = io.NopCloser(bytes.NewReader(body))
-		}
-		atomic.AddInt64(&cache.RX, reqSize)
-
-		rw := &response{ResponseWriter: c.Writer}
-		c.Writer = rw
+		resp := &response{ResponseWriter: c.Writer}
+		c.Writer = resp
 		c.Next()
+		atomic.AddInt64(&cache.TX, int64(resp.size))
+	}
+}
 
-		atomic.AddInt64(&cache.TX, int64(rw.size))
+func RX(cache *cache.Cache) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		atomic.AddInt64(&cache.RX, int64(len(fmt.Sprintf("%s %s %s\r\n", c.Request.Method, c.Request.RequestURI, c.Request.Proto))))
+		for name, values := range c.Request.Header {
+			for _, value := range values {
+				atomic.AddInt64(&cache.RX, int64(len(fmt.Sprintf("%s: %s\r\n", name, value))))
+			}
+		}
+		var buf bytes.Buffer
+		tee := io.TeeReader(c.Request.Body, &buf)
+		body, err := io.ReadAll(tee)
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+		c.Request.Body = io.NopCloser(&buf)
+		atomic.AddInt64(&cache.RX, int64(len(body))+2)
+		c.Next()
 	}
 }
 

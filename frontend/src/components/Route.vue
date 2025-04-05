@@ -211,9 +211,9 @@ function addItem(name, type) {
     <div>
       <div>
         <h2 class="title">RouteNX</h2>
-        <div class="line"></div>
       </div>
     </div>
+    <div class="line"></div>
     <div class="container">
       <h2 class="title">{{ t('proxyTitle') }}</h2>
       <p class="description">{{ t('proxyDescription') }}</p>
@@ -298,12 +298,11 @@ function addItem(name, type) {
             </td>
           </tr>
           <tr class="rule-none">
-            <td>
+            <td colspan="3">
               <p @click="addRule('routes')" class="lefts">+ {{ t('addmore') }}</p>
             </td>
-            <td colspan="2"></td>
             <td>
-              <p class="center">{{ data.routes.length }}</p>
+              <p class="left-center">{{ data.routes.length }}</p>
             </td>
           </tr>
         </tbody>
@@ -394,12 +393,11 @@ function addItem(name, type) {
             </td>
           </tr>
           <tr class="rule-none">
-            <td>
+            <td colspan="3">
               <p @click="addRule('firewall')" class="lefts">+ {{ t('addmore') }}</p>
             </td>
-            <td colspan="2"></td>
             <td>
-              <p class="center">{{ data.firewall.length }}</p>
+              <p class="left-center">{{ data.firewall.length }}</p>
             </td>
           </tr>
         </tbody>
@@ -414,7 +412,7 @@ function addItem(name, type) {
       <div class="log">
         <pre>{{ t('errorLog') }}</pre>
         <pre>{{ t('time') }} | {{ t('error') }}</pre>
-        <pre v-for="(item, index) in logger.error" :key="index">{{ item.time }}: {{ item.host }} {{ item.forward_ip }} {{ item.origin_ip }}</pre>
+        <pre v-for="(item, index) in logger.error" :key="index">{{ item.time }}: {{ item.error }}</pre>
         <pre></pre>
         <pre>{{ t('firewallBlockLog') }}</pre>
         <pre>{{ t('time') }} | {{ t('host') }} | {{ t('forwardIp') }} | {{ t('originIp') }}</pre>
