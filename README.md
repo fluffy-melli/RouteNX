@@ -1,14 +1,12 @@
-![Let's Encrypt](https://img.shields.io/badge/SSL-Let's%20Encrypt-orange?style=flat-square&logo=letsencrypt&logoColor=white) ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=Docker&logoColor=white) ![Go](https://img.shields.io/badge/Go-00ADD8?style=flat-square&logo=go&logoColor=white) ![Vue](https://img.shields.io/badge/-Vue.js-42b883?style=flat-square&logo=vue.js&logoColor=white) ![SCSS](https://img.shields.io/badge/SCSS-CC6699?style=flat-square&logo=sass&logoColor=white)
-
----
-
-### ⚙️ Build Image
 
 ```sh
 docker build -t routenx .
 ```
 
-### 🚀 Run Container
+> [!NOTE]  
+> Builds a Docker image tagged **`routenx`**, using the current directory as the build context.
+
+---
 
 ```sh
 docker run -d \
@@ -18,11 +16,12 @@ docker run -d \
     routenx
 ```
 
+> [!NOTE]  
+> Runs the **`routenx`** container in detached mode,  
+> restarts automatically unless stopped,  
+> and maps ports **80**, **443**, and **3000** to the host.
+
 ---
-
-## ⚙️ Configuration
-
-### 🔌 Ports
 
 ```json
 "port": 80,
@@ -30,33 +29,33 @@ docker run -d \
 "web-port": 3000
 ```
 
-- `80`: HTTP Proxy  
-- `443`: HTTPS Proxy (SSL)  
-- `3000`: Web Console
+> [!NOTE]  
+> Port **80** is for HTTP, **443** for HTTPS (SSL), and **3000** is used by the Web Console interface.
 
 ---
 
-### 🌐 Routes
-
 ```json
-"routes": [
-  {
-    "host": ["*.example.com"],
-    "firewall": ["cloudflare"],
-    "endpoint": "http://localhost:2222"
-  }
-]
+"ssl": {
+  "enabled": true,
+  "email": "you@example.com",
+  "domains": [
+    "example.com",
+    "sub.example.com"
+  ]
+}
 ```
 
-- Routes `*.example.com` to `localhost:2222`  
-- Allows only Cloudflare IPs
+> [!WARNING]  
+> Be sure to replace `"you@example.com"` and `"example.com"` with your actual email and domain.  
+> SSL certificate generation will fail if these values are invalid.
+
+> [!NOTE]  
+> Enables SSL and listens on port **443** for HTTPS traffic.
 
 ---
 
-### 🔐 Firewall
-
 ```json
-"firewall": [
+"firewalls": [
   {
     "name": "cloudflare",
     "cidr": [
@@ -70,38 +69,25 @@ docker run -d \
 ]
 ```
 
-- Allows requests only from Cloudflare’s IP ranges
+> [!TIP]  
+> Routes using this firewall rule **only accept packets coming through Cloudflare.**
 
 ---
-
-### 📄 SSL Configuration
 
 ```json
-"ssl": {
-  "enabled": true,
-  "email": "you@example.com",
-  "domains": [
-    "example.com",
-    "sub.example.com"
-  ]
-}
+"routes": [
+  {
+    "host": [
+      "*.example.com"
+    ],
+    "firewall": [
+      "cloudflare"
+    ],
+    "endpoint": "http://localhost:2222"
+  }
+]
 ```
 
-> [!WARNING]
-> Don't forget to update `"you@example.com"` and `"example.com"` with your real email and domain.
-> Without valid information, SSL certificate generation will fail.
-
-- Automatic SSL (Let's Encrypt)  
-- Requires valid email and domain  
-- Listens on port `443` for `https`
-
----
-
-### ✅ Summary
-
-- 🌐 Reverse proxy server with Docker support  
-- 🔐 SSL certificate management (Let's Encrypt)  
-- 🔥 Domain-based routing & Cloudflare firewall  
-- 🧰 **Web admin console available at port `3000`**
-
----
+> [!NOTE]  
+> Routes traffic from `*.example.com` to `localhost:2222`,  
+> and only accepts requests from **Cloudflare IPs**.
