@@ -7,7 +7,7 @@ import (
 )
 
 func IsCidrBlock(c *config.RouteNX, route *config.Route, ip string) bool {
-	for _, firewall := range c.Firewall {
+	for _, firewall := range c.Firewalls {
 		for _, RoutefirewallL := range route.Firewall {
 			if firewall.Name == RoutefirewallL {
 				for _, blockIP := range firewall.CIDR {

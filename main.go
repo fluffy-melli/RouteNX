@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net"
 	"time"
 
 	"github.com/fluffy-melli/RouteNX/internal/console"
@@ -19,19 +20,35 @@ func Run(router *gin.Engine, port uint16, server string) {
 	}
 }
 
+func LocalIP() string {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return "localhost"
+	}
+
+	for _, addr := range addrs {
+		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				return ipnet.IP.String()
+			}
+		}
+	}
+	return "localhost"
+}
+
 func main() {
 	cache := cache.NewCache()
 
 	go func() {
 		router := proxy.Router(cache)
-		logger.INFO("Proxy server running at {blue}http://localhost:%d{reset}", cache.Config.Port)
+		logger.INFO("Proxy server running at {blue}http://%s:%d{reset}", LocalIP(), cache.Config.Port)
 		if cache.Config.SSL.Enabled {
-			SSL, err := ssl.NewSSL(cache.Config.SSL.Domain, cache.Config.SSL.Email)
+			SSL, err := ssl.NewSSL(cache.Config.SSL.Domains, cache.Config.SSL.Email)
 			if err != nil {
 				logger.ERROR("Failed to create SSL certificate: %s", err.Error())
 				return
 			}
-			logger.INFO("Proxy server (ssl) at {blue}https://localhost:%d{reset}", cache.Config.SSLPort)
+			logger.INFO("Proxy server (ssl) running at {blue}https://%s:%d{reset}", LocalIP(), cache.Config.SSLPort)
 			go func(SSL *ssl.SSL) {
 				for {
 					time.Sleep(60 * 24 * time.Hour)
@@ -55,7 +72,7 @@ func main() {
 
 	go func() {
 		router := console.Router(cache)
-		logger.INFO("Web console server running at {blue}http://localhost:%d{reset}", cache.Config.WebPort)
+		logger.INFO("Web console server running at {blue}http://%s:%d{reset}", LocalIP(), cache.Config.WebPort)
 		if err := router.Run(fmt.Sprintf(":%d", cache.Config.WebPort)); err != nil {
 			logger.ERROR("Web console server failed to start: %s", err.Error())
 			return

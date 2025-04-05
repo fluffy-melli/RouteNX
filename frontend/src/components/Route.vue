@@ -18,7 +18,7 @@ const data = ref([])
 const logger = ref([])
 const selected = ref({})
 
-const debug = false
+const debug = true
 const api = debug ? 'http://localhost:3000' : window.location.origin
 
 const baseProxyRule = {
@@ -321,8 +321,8 @@ function addItem(name, type) {
             <th class="short">{{ t('actions') }}</th>
           </tr>
         </thead>
-        <tbody v-if="data.firewall">
-          <tr class="rule" v-for="(item, index) in data.firewall" :key="index" @click="selectRule('firewall', index)">
+        <tbody v-if="data.firewalls">
+          <tr class="rule" v-for="(item, index) in data.firewalls" :key="index" @click="selectRule('firewall', index)">
             <td>
               <select class="select" @click.stop>
                 <option>
@@ -363,13 +363,13 @@ function addItem(name, type) {
                 <div class="menu">
                   <p class="title">{{ t('rulename') }}</p>
                   <div class="edit">
-                    <input v-model="data.firewall[selected.firewall].name"/>
+                    <input v-model="data.firewalls[selected.firewall].name"/>
                   </div>
                 </div>
                 <div class="plus"></div>
                 <div class="menu">
                   <p class="title">To</p>
-                  <select v-model="data.firewall[selected.firewall].block" class="to-select">
+                  <select v-model="data.firewalls[selected.firewall].block" class="to-select">
                     <option :value="false">
                       {{ t('allow') }}
                     </option>
@@ -383,8 +383,8 @@ function addItem(name, type) {
                 </div>
                 <div class="menu">
                   <p class="title">CIDR</p>
-                  <div class="edit" v-for="(item, index) in data.firewall[selected.firewall].cidr" :key="index">
-                    <input class="left" v-model="data.firewall[selected.firewall].cidr[index]"/>
+                  <div class="edit" v-for="(item, index) in data.firewalls[selected.firewall].cidr" :key="index">
+                    <input class="left" v-model="data.firewalls[selected.firewall].cidr[index]"/>
                     <img class="remove" src="../assets/svg/remove.svg" alt="remove" @click="removeItem('firewall', 'cidr', index)"/>
                   </div>
                 </div>
@@ -397,7 +397,7 @@ function addItem(name, type) {
               <p @click="addRule('firewall')" class="lefts">+ {{ t('addmore') }}</p>
             </td>
             <td>
-              <p class="left-center">{{ data.firewall.length }}</p>
+              <p class="left-center">{{ data.firewalls.length }}</p>
             </td>
           </tr>
         </tbody>

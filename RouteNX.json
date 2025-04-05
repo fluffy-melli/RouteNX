@@ -5,7 +5,7 @@
   "ssl": {
     "enabled": false,
     "email": "example@example.com",
-    "domain": [
+    "domains": [
       "example.com",
       "example0.example.com",
       "example1.example.com"
@@ -22,7 +22,7 @@
       "endpoint": "http://localhost:2222"
     }
   ],
-  "firewall": [
+  "firewalls": [
     {
       "name": "cloudflare",
       "cidr": [
