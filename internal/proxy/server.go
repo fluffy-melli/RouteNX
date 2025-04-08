@@ -12,6 +12,7 @@ func Router(cache *cache.Cache) *gin.Engine {
 	if cache.Config.SSL.Enabled {
 		r.Use(middleware.SSLRedirect)
 	}
+	r.LoadHTMLGlob("templates/*")
 	r.Use(middleware.RX(cache))
 	r.Use(middleware.TX(cache))
 	r.Any("/*all", middleware.Proxy(cache))

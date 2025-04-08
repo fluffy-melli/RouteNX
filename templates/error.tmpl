@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{ .error }}</title>
+        <style>
+            body {
+                background-color: #f8f8f8;
+                color: #333;
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                height: 100vh;
+                margin: 0;
+            }
+
+            h1 {
+                font-size: 2rem;
+                font-weight: bold;
+                margin: 0.5rem 0;
+                color:rgb(236, 92, 92);
+            }
+
+            hr {
+                width: 75%;
+                border: none;
+                border-top: 1px solid #ccc;
+                margin: 1rem 0;
+            }            
+
+            p {
+                font-size: 1.2rem;
+                color: #666;
+                margin: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>{{ .error }}</h1>
+        <hr/>
+        <p>RouteNX</p>
+    </body>
+</html>

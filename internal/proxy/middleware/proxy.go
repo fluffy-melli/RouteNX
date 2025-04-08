@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/fluffy-melli/RouteNX/internal/proxy/handler"
 	"github.com/fluffy-melli/RouteNX/pkg/cache"
 	"github.com/fluffy-melli/RouteNX/pkg/firewall"
 	"github.com/fluffy-melli/RouteNX/pkg/logger"
@@ -16,7 +17,7 @@ func Proxy(cache *cache.Cache) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		to := cache.Config.GetRoute(c.Request.Host)
 		if to == nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "No Route"})
+			handler.NoRoute(c)
 			return
 		}
 
@@ -27,7 +28,7 @@ func Proxy(cache *cache.Cache) gin.HandlerFunc {
 				Host:      c.Request.Host,
 				Time:      time.Now().Format(time.RFC3339),
 			})
-			c.JSON(http.StatusForbidden, gin.H{"error": "CIDR IP Block"})
+			handler.IPBlock(c)
 			return
 		}
 
@@ -38,7 +39,7 @@ func Proxy(cache *cache.Cache) gin.HandlerFunc {
 				Time:  time.Now().Format(time.RFC3339),
 			})
 			logger.WARNING("%s", err.Error())
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			handler.InternalError(c, err)
 			return
 		}
 
@@ -50,7 +51,7 @@ func Proxy(cache *cache.Cache) gin.HandlerFunc {
 				Time:  time.Now().Format(time.RFC3339),
 			})
 			logger.WARNING("%s", err.Error())
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			handler.InternalError(c, err)
 			return
 		}
 		defer resp.Body.Close()
@@ -70,7 +71,7 @@ func Proxy(cache *cache.Cache) gin.HandlerFunc {
 				Time:  time.Now().Format(time.RFC3339),
 			})
 			logger.WARNING("%s", err.Error())
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			handler.InternalError(c, err)
 		}
 	}
 }
