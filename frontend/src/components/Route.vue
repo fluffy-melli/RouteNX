@@ -18,7 +18,7 @@ const data = ref([])
 const logger = ref([])
 const selected = ref({})
 
-const debug = true
+const debug = false
 const api = debug ? 'http://localhost:3000' : window.location.origin
 
 const baseProxyRule = {
