@@ -23,6 +23,7 @@ func NewCache() *Cache {
 	var err error
 	cfg, err := config.LoadFromFile(config.RouteNXJSON)
 	if err != nil {
+		logger.WARNING(err.Error())
 		cfg = config.NewRouteNX()
 		cfg.SaveToFile(config.RouteNXJSON)
 	}
