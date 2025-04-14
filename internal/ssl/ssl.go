@@ -33,7 +33,7 @@ func (u *SSL) GetPrivateKey() crypto.PrivateKey {
 	return u.key
 }
 
-func NewSSL(domain []string, email string) (*SSL, error) {
+func NewSSL(domain []string, email string, testing bool) (*SSL, error) {
 	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		return nil, err
@@ -46,7 +46,11 @@ func NewSSL(domain []string, email string) (*SSL, error) {
 	}
 
 	config := lego.NewConfig(ssl)
-	config.CADirURL = lego.LEDirectoryProduction
+	if testing {
+		config.CADirURL = lego.LEDirectoryStaging
+	} else {
+		config.CADirURL = lego.LEDirectoryProduction
+	}
 	config.Certificate.KeyType = certcrypto.RSA2048
 
 	client, err := lego.NewClient(config)

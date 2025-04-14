@@ -12,12 +12,10 @@ FROM alpine:latest
 
 WORKDIR /root/
 
-RUN apk add --no-cache certbot openssl
-
-COPY --from=builder /app/routenx .
-COPY --from=builder /app/RouteNX.json ./RouteNX.json
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/routenx ./routenx
 COPY --from=builder /app/templates ./templates
+COPY --from=builder /app/RouteNX.json ./RouteNX.json
 
 EXPOSE 80
 EXPOSE 443

@@ -57,9 +57,15 @@ func ColorTags(input string) string {
 	})
 }
 
+var Try = "{blue}➤{reset}"
 var Info = "{green}✔{reset}"
 var Error = "{red}✘{reset}"
 var Warning = "{yellow}⚠{reset}"
+
+func TRY(format string, a ...any) {
+	message := fmt.Sprintf("[%s] %s\n", Try, fmt.Sprintf(format, a...))
+	fmt.Print(ColorTags(message))
+}
 
 func INFO(format string, a ...any) {
 	message := fmt.Sprintf("[%s] %s\n", Info, fmt.Sprintf(format, a...))

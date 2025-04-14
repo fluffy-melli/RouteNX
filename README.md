@@ -1,4 +1,11 @@
 
+<div align="center">
+  <h3>
+    <a href="https://github.com/fluffy-melli/RouteNX/blob/main/README.KR.md">KR</a> /
+    <a href="https://github.com/fluffy-melli/RouteNX/">EN</a>
+  </h3>
+</div>
+
 ```sh
 docker build -t routenx .
 ```
@@ -10,7 +17,6 @@ docker build -t routenx .
 
 ```sh
 docker run -d \
-    --name routenx \
     --restart unless-stopped \
     -p 80:80 -p 443:443 -p 3000:3000 \
     routenx
@@ -37,6 +43,7 @@ docker run -d \
 ```json
 "ssl": {
   "enabled": true,
+  "testing": true,
   "email": "you@example.com",
   "domains": [
     "example.com",
@@ -48,6 +55,11 @@ docker run -d \
 > [!WARNING]  
 > Be sure to replace `"you@example.com"` and `"example.com"` with your actual email and domain.  
 > SSL certificate generation will fail if these values are invalid.
+
+> [!TIP]  
+> When `"testing"` is set to `true`, SSL certificates will be requested from **Let's Encrypt's staging environment**.  
+> This is useful for development and testing because it avoids **rate limits**.  
+> Set `"testing": false` for production to obtain real certificates.
 
 > [!NOTE]  
 > Enables SSL and listens on port **443** for HTTPS traffic.

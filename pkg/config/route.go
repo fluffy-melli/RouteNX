@@ -25,6 +25,7 @@ type Route struct {
 
 type SSL struct {
 	Enabled bool     `json:"enabled"`
+	Testing bool     `json:"testing"`
 	Email   string   `json:"email"`
 	Domains []string `json:"domains"`
 }
