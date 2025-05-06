@@ -9,7 +9,6 @@ import (
 	"github.com/fluffy-melli/RouteNX/pkg/cache"
 	"github.com/fluffy-melli/RouteNX/pkg/firewall"
 	"github.com/fluffy-melli/RouteNX/pkg/logger"
-	"github.com/fluffy-melli/RouteNX/pkg/request"
 	"github.com/gin-gonic/gin"
 )
 
@@ -32,32 +31,29 @@ func Proxy(cache *cache.Cache) gin.HandlerFunc {
 			return
 		}
 
-		req, err := request.HTTP(c, to.Endpoint)
+		req, err := http.NewRequest(c.Request.Method, to.Endpoint+c.Request.RequestURI, c.Request.Body)
 		if err != nil {
-			cache.Logger.AddErrorLog(logger.ErrorLogger{
-				Error: err.Error(),
-				Time:  time.Now().Format(time.RFC3339),
-			})
-			logger.WARNING("%s", err.Error())
 			handler.InternalError(c, err)
 			return
 		}
 
+		for key, values := range c.Request.Header {
+			for _, value := range values {
+				req.Header.Add(key, value)
+			}
+		}
+
+		req.ContentLength = c.Request.ContentLength
+
 		client := &http.Client{}
 		resp, err := client.Do(req)
 		if err != nil {
-			cache.Logger.AddErrorLog(logger.ErrorLogger{
-				Error: err.Error(),
-				Time:  time.Now().Format(time.RFC3339),
-			})
-			logger.WARNING("%s", err.Error())
 			handler.InternalError(c, err)
 			return
 		}
 		defer resp.Body.Close()
 
 		c.Status(resp.StatusCode)
-
 		for key, values := range resp.Header {
 			for _, value := range values {
 				c.Header(key, value)
@@ -66,12 +62,8 @@ func Proxy(cache *cache.Cache) gin.HandlerFunc {
 
 		_, err = io.Copy(c.Writer, resp.Body)
 		if err != nil {
-			cache.Logger.AddErrorLog(logger.ErrorLogger{
-				Error: err.Error(),
-				Time:  time.Now().Format(time.RFC3339),
-			})
-			logger.WARNING("%s", err.Error())
 			handler.InternalError(c, err)
+			return
 		}
 	}
 }
