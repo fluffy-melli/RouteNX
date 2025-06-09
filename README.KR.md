@@ -7,13 +7,23 @@
 </div>
 
 ```sh
+go build -o routenx ./main.go
+pm2 start routenx --name routenx
+```
+
+> [!NOTE]  
+> Go 애플리케이션을 **`routenx`** 라는 실행 파일로 빌드하고,
+> **PM2** 를 사용해 백그라운드에서 **`routenx`**를 실행합니다.
+> **PM2** 는 프로세스를 자동으로 재시작하고 모니터링할 수 있습니다.
+
+---
+
+```sh
 docker build -t routenx .
 ```
 
 > [!NOTE]  
 > 현재 디렉토리를 빌드 컨텍스트로 사용하여 **`routenx`**라는 태그를 가진 Docker 이미지를 생성합니다.
-
----
 
 ```sh
 docker run -d \

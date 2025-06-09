@@ -7,13 +7,23 @@
 </div>
 
 ```sh
+go build -o routenx ./main.go
+pm2 start routenx --name routenx
+```
+
+> [!NOTE]  
+> Builds the Go application as an executable named **`routenx`**,
+> then runs it in the background using **PM2**.
+> **PM2** automatically restarts the process if it crashes and provides monitoring capabilities.
+
+---
+
+```sh
 docker build -t routenx .
 ```
 
 > [!NOTE]  
 > Builds a Docker image tagged **`routenx`**, using the current directory as the build context.
-
----
 
 ```sh
 docker run -d \
