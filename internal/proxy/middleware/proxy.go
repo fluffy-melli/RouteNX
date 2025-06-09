@@ -14,6 +14,14 @@ import (
 
 func Proxy(cache *cache.Cache) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		logger.CsvAppend([]string{
+			time.Now().String(),
+			c.RemoteIP(),
+			c.ClientIP(),
+			c.Request.Host,
+			c.Request.RequestURI,
+		})
+
 		to := cache.Config.GetRoute(c.Request.Host)
 		if to == nil {
 			handler.NoRoute(c)
