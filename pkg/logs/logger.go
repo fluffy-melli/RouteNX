@@ -1,42 +1,10 @@
-package logger
+package logs
 
 import (
 	"fmt"
 	"os"
 	"regexp"
 )
-
-type BlockLogger struct {
-	OriginIP  string `json:"origin_ip"`
-	ForwardIP string `json:"forward_ip"`
-	Host      string `json:"host"`
-	Time      string `json:"time"`
-}
-
-type ErrorLogger struct {
-	Error string `json:"error"`
-	Time  string `json:"time"`
-}
-
-type Logger struct {
-	Block []BlockLogger `json:"block"`
-	Error []ErrorLogger `json:"error"`
-}
-
-func (l *Logger) AddBlockLog(block BlockLogger) {
-	l.Block = append(l.Block, block)
-}
-
-func (l *Logger) AddErrorLog(err ErrorLogger) {
-	l.Error = append(l.Error, err)
-}
-
-func NewLogger() *Logger {
-	return &Logger{
-		Block: make([]BlockLogger, 0),
-		Error: make([]ErrorLogger, 0),
-	}
-}
 
 var colorMap = map[string]string{
 	"red":    "\033[31m",

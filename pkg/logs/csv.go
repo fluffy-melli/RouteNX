@@ -1,4 +1,4 @@
-package logger
+package logs
 
 import (
 	"encoding/csv"

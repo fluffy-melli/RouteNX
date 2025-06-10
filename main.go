@@ -5,18 +5,18 @@ import (
 	"net"
 	"time"
 
+	"github.com/fluffy-melli/RouteNX/internal/cache"
 	"github.com/fluffy-melli/RouteNX/internal/console"
 	"github.com/fluffy-melli/RouteNX/internal/proxy"
-	"github.com/fluffy-melli/RouteNX/internal/proxy/middleware"
-	"github.com/fluffy-melli/RouteNX/internal/ssl"
-	"github.com/fluffy-melli/RouteNX/pkg/cache"
-	"github.com/fluffy-melli/RouteNX/pkg/logger"
+	"github.com/fluffy-melli/RouteNX/pkg/certs"
+	"github.com/fluffy-melli/RouteNX/pkg/logs"
+	"github.com/fluffy-melli/RouteNX/pkg/stats"
 	"github.com/gin-gonic/gin"
 )
 
 func Run(router *gin.Engine, port uint16, server string) {
 	if err := router.Run(fmt.Sprintf(":%d", port)); err != nil {
-		logger.INFO("%s failed to start: %s", server, err.Error())
+		logs.INFO("%s failed to start: %s", server, err.Error())
 	}
 }
 
@@ -37,49 +37,49 @@ func LocalIP() string {
 }
 
 func main() {
-	cache := cache.NewCache()
+	cache.Value = cache.NewCache()
 
-	logger.TRY("--------------------- [{yellow}URL{reset}] ----------------------")
-	logger.INFO("proxy (http)  : {blue}http://%s:%d{reset}", LocalIP(), cache.Config.Port)
-	logger.INFO("proxy (https) : {blue}http://%s:%d{reset}", LocalIP(), cache.Config.SSLPort)
-	logger.INFO("web-console   : {blue}http://%s:%d{reset}", LocalIP(), cache.Config.WebPort)
+	logs.TRY("--------------------- [{yellow}URL{reset}] ----------------------")
+	logs.INFO("proxy (http)  : {blue}http://%s:%d{reset}", LocalIP(), cache.Value.Config.Port)
+	logs.INFO("proxy (https) : {blue}http://%s:%d{reset}", LocalIP(), cache.Value.Config.SSLPort)
+	logs.INFO("web-console   : {blue}http://%s:%d{reset}", LocalIP(), cache.Value.Config.WebPort)
 
 	go func() {
-		router := proxy.Router(cache)
-		if cache.Config.SSL.Enabled {
-			logger.TRY("--------------- [{yellow}Trying: SSL Cert{reset}] ---------------")
-			SSL, err := ssl.NewSSL(cache.Config.SSL.Domains, cache.Config.SSL.Email, cache.Config.SSL.Testing)
+		router := proxy.Router()
+		if cache.Value.Config.SSL.Enabled {
+			logs.TRY("--------------- [{yellow}Trying: SSL Cert{reset}] ---------------")
+			SSL, err := certs.NewSSL(cache.Value.Config.SSL.Domains, cache.Value.Config.SSL.Email, cache.Value.Config.SSL.Testing)
 			if err != nil {
-				logger.ERROR("--------------- [{red}Failed: SSL Cert{reset}] ---------------\n{red}%v{reset}", err)
+				logs.ERROR("--------------- [{red}Failed: SSL Cert{reset}] ---------------\n{red}%v{reset}", err)
 				return
 			}
-			go func(SSL *ssl.SSL) {
+			go func(SSL *certs.SSL) {
 				for {
 					time.Sleep(60 * 24 * time.Hour)
-					logger.TRY("--------------- [{yellow}Trying: SSL Renew{reset}] --------------")
+					logs.TRY("--------------- [{yellow}Trying: SSL Renew{reset}] --------------")
 					if err := SSL.Renew(); err != nil {
-						logger.ERROR("--------------- [{red}Failed: SSL Renew{reset}] --------------\n{red}%v{reset}", err)
+						logs.ERROR("--------------- [{red}Failed: SSL Renew{reset}] --------------\n{red}%v{reset}", err)
 					}
 				}
 			}(SSL)
-			if err := SSL.ApplyToGin(router, fmt.Sprintf(":%d", cache.Config.SSLPort)); err != nil {
-				logger.ERROR("Proxy server (ssl) failed to start: %s", err.Error())
+			if err := SSL.ApplyToGin(router, fmt.Sprintf(":%d", cache.Value.Config.SSLPort)); err != nil {
+				logs.ERROR("Proxy server (ssl) failed to start: %s", err.Error())
 				return
 			}
 		}
-		if err := router.Run(fmt.Sprintf(":%d", cache.Config.Port)); err != nil {
-			logger.ERROR("Proxy server failed to start: %s", err.Error())
+		if err := router.Run(fmt.Sprintf(":%d", cache.Value.Config.Port)); err != nil {
+			logs.ERROR("Proxy server failed to start: %s", err.Error())
 			return
 		}
 	}()
 
 	go func() {
-		router := console.Router(cache)
-		if err := router.Run(fmt.Sprintf(":%d", cache.Config.WebPort)); err != nil {
-			logger.ERROR("Web console server failed to start: %s", err.Error())
+		router := console.Router()
+		if err := router.Run(fmt.Sprintf(":%d", cache.Value.Config.WebPort)); err != nil {
+			logs.ERROR("Web console server failed to start: %s", err.Error())
 			return
 		}
 	}()
 
-	middleware.Traffic(cache)
+	stats.Traffic()
 }
